@@ -1,8 +1,9 @@
-import { HttpException, Injectable } from "@nestjs/common";
+import { Delete, HttpException, Injectable, Param } from "@nestjs/common";
 import * as Bcryptjs from 'bcryptjs';
 import * as Jwt from 'jsonwebtoken';
 import User from "src/entity/user";
-import { UserSchema } from "src/joi.schema";
+import { UserSchema, UserUpdateSchema } from "src/joi.schema";
+import { PAZE_SIZE, toIntegerOrZero } from "./util";
 
 @Injectable()
 export default class UserService{
@@ -68,5 +69,60 @@ export default class UserService{
         user.isManager = param.isManager;
         await user.save();
         return user;
+    }
+
+    async getUsers(page: string){
+        const users = await User.find({
+            take: PAZE_SIZE,
+            skip: (toIntegerOrZero(page) - 1)*PAZE_SIZE,
+            order: {id: 'DESC'},
+        });
+        const totalUsers = await User.count({});
+        return {users, pageCount: Math.ceil(totalUsers / PAZE_SIZE)};
+    }
+
+    async updateUser(
+        id,
+        param: {
+            name?: string;
+            email?: string;
+            password?: string;
+            isManager?: boolean;
+        }
+    ){
+        const { value, error } = UserUpdateSchema.validate(param);
+        if(error) throw new HttpException(error.message, 400);
+        const {name, email, password, isManager} = value;
+        const user = await User.findOne(id);
+        if(name) user.name = name;
+        if( email ){
+            if(email){
+                const existingUser = await User.findOne({
+                    where:{
+                        email: email.toLowerCase()
+                    }
+                });
+                if(existingUser && existingUser?.id != Number(id))
+                    throw new HttpException(' Email already exist', 400);
+                else user.email = email;
+             }
+             if(isManager === true || isManager === false){
+                user.isManager = isManager;
+             }
+
+             if(password) user.password = Bcryptjs.hashSync(password, 10);
+
+             await user.save();
+             return{
+                id: id,
+                email: user.email,
+                name: user.name,
+                isAdmin: user.isManager,
+             }
+        }    
+    }
+
+    async deleteUser(id: string){
+        await User.delete(id);
     }
 }
