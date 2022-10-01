@@ -56,4 +56,17 @@ export default class UserService{
             isManager: user.isManager
         }
     }
+
+    async addUser(param: {
+        password:string;
+        name:string;
+        isManager:boolean;
+        email:string
+    }){
+        const {id} = await this.signup(param);
+        const user = await User.findOne(id);
+        user.isManager = param.isManager;
+        await user.save();
+        return user;
+    }
 }
