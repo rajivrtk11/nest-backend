@@ -13,3 +13,10 @@ export const UserUpdateSchema = Joi.object({
     isManager: Joi.boolean().required(),
     email: Joi.string().email().required(),    
 })
+
+export  const BikeSchema = Joi.object({
+    location: Joi.string().min(3).max(100).required(),
+    model: Joi.string().min(3).max(100).required(),
+    color: Joi.string().min(3).max(100).required(),
+    isAvailable: Joi.boolean().required(),
+})
