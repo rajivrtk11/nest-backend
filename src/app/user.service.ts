@@ -23,7 +23,7 @@ export default class UserService{
                         id:user.id,
                     },
                     'secret',
-                    { expiresIn: 'Id' },
+                    { expiresIn: '1d' },
                 ),
             };
         }

@@ -9,13 +9,15 @@ import BikeController from './app/bike.controller';
 import BikeService from './app/bike.service';
 import GenericService from './app/generic.service';
 import Bike from './entity/bike';
+import Reservation from './entity/reservations';
+import Rating from './entity/rating';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'data.db',
-      entities: [User, Bike],
+      entities: [User, Bike, Reservation, Rating],
       synchronize: true,
       logging: 'all'
     })
