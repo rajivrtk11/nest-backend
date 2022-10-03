@@ -10,6 +10,7 @@ import { PAZE_SIZE, toIntegerOrZero } from "./util";
 import * as _ from 'lodash';
 import Reservation from "src/entity/reservations";
 import Rating from "src/entity/rating";
+import { execArgv } from "process";
 
 @Injectable()
 export default class BikeService {
@@ -116,5 +117,32 @@ export default class BikeService {
         await Bike.delete({ id: Number(id)});
         await Rating.delete({ bikeId: Number(id)});
         return {};
+    }
+
+    async addBikeRating(bikeId: string, rating: number, authUser: User){
+        await this.g.validateBike(bikeId);
+        const ratingNumber = Number(rating) || -1;
+        if( ratingNumber < 1 || ratingNumber > 5)
+            throw new HttpException('Enter valid rating between 1 to 5', 400);
+        const exRating = await Rating.findOne({
+            userId: authUser.id,
+            bikeId: Number(bikeId),
+        });
+        if(exRating) throw new HttpException('You already rated this', 400);
+        const rate = new Rating();
+        rate.bikeId = Number(bikeId);
+        rate.userId = Number(authUser.id);
+        rate.rating = Number(rating);
+        await rate.save();
+        await this.updateBikeRating(Number(bikeId));
+        return Bike.findOne(Number(bikeId));
+    }
+
+    private async updateBikeRating(bikeId: number){
+        const ratings = await Rating.find({ where: {bikeId}});
+        const totalRating = ratings.reduce((total, val) => total + val.rating, 0);
+        const bike = await Bike.findOne(bikeId);
+        bike.rating = Number(Number(totalRating/ratings.length).toFixed(2));
+        await bike.save();
     }
 }
