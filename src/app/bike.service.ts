@@ -110,4 +110,11 @@ export default class BikeService {
         await bike.save();
         return bike;
     }
+
+    async deleteBike(id: string){
+        await this.g.validateBike(id);
+        await Bike.delete({ id: Number(id)});
+        await Rating.delete({ bikeId: Number(id)});
+        return {};
+    }
 }
