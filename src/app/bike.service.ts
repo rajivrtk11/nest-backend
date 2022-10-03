@@ -63,7 +63,7 @@ export default class BikeService {
         if(location)
              query = query.where('bike.location = :location', {location});
         if(rateAverage)
-             query = query.where('bike.rateAverage = :rateAverage', {rateAverage});
+             query = query.where('bike.rating = :rateAverage', {rateAverage});
         
         const take = PAZE_SIZE;
         const offset = (toIntegerOrZero(page) - 1) * PAZE_SIZE;

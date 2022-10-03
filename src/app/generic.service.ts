@@ -11,9 +11,9 @@ export default class GenericService {
                 400,
             )
         if(from >= to)
-                throw new HttpException(
-                    'From datetime should be less than to datetime',
-                    400,
-                )
+            throw new HttpException(
+                'From datetime should be less than to datetime',
+                400,
+            )
     }
 }
