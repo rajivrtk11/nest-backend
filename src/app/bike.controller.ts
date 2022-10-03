@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
-import { userInfo } from "os";
 import AuthGuard from "src/auth.guard";
 import Bike from "src/entity/bike";
+import Reservation from "src/entity/reservations";
 import User from "src/entity/user";
 import BikeService from "./bike.service";
 import { AUser } from "./util";
@@ -56,5 +56,11 @@ export default class BikeController{
         @AUser() user,
     ){
         return this.bs.addBikeRating(bikeId, rating, user);
+    }
+
+    @UseGuards(AuthGuard)
+    @Post('/reserve')
+    async reserveBike(@Body() body: Reservation, @AUser() user: User){
+        return this.bs.reserveBike(body, user)
     }
 }

@@ -1,4 +1,4 @@
-import { Delete, HttpException, Injectable, Param } from "@nestjs/common";
+import { HttpException, Injectable } from "@nestjs/common";
 import * as Bcryptjs from 'bcryptjs';
 import * as Jwt from 'jsonwebtoken';
 import User from "src/entity/user";

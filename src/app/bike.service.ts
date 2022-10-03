@@ -1,16 +1,13 @@
-import { HttpException, Injectable, RequestMapping } from "@nestjs/common";
-import { query } from "express";
-import { find } from "rxjs";
+import { HttpException, Injectable } from "@nestjs/common";
 import Bike from "src/entity/bike";
 import User from "src/entity/user";
-import { BikeSchema, GetBikesFilter } from "src/joi.schema";
-import { getRepository, In, QueryResult } from "typeorm";
+import { BikeSchema, GetBikesFilter, ReservationSchema } from "src/joi.schema";
+import { getRepository, In } from "typeorm";
 import GenericService from "./generic.service";
 import { PAZE_SIZE, toIntegerOrZero } from "./util";
 import * as _ from 'lodash';
 import Reservation from "src/entity/reservations";
 import Rating from "src/entity/rating";
-import { execArgv } from "process";
 
 @Injectable()
 export default class BikeService {
@@ -144,5 +141,26 @@ export default class BikeService {
         const bike = await Bike.findOne(bikeId);
         bike.rating = Number(Number(totalRating/ratings.length).toFixed(2));
         await bike.save();
+    }
+
+    async reserveBike(body: Reservation, auth: User){
+        if(auth.isManager) throw new HttpException('Permission denied', 403);
+        const res = new Reservation();
+        const { value, error } = ReservationSchema.validate(body);
+        if(error) throw new HttpException(error.message, 400);
+        const { bikeId, fromDate, toDate } = value;
+        const bike = await this.g.validateBike(bikeId);
+        await this.g.validateFromTo(fromDate, toDate);
+        const unavailableBikes = await this.getNonAvailableBikes(fromDate, toDate);
+        if(!bike.isAvailable || unavailableBikes.includes(bike.id)){
+            throw new HttpException(
+                'Current bike is not available',
+                400
+            )
+        }
+        Object.assign(res, { fromDate, toDate, bikeId });
+        res.userId = auth.id;
+        await res.save();
+        return res;
     }
 }

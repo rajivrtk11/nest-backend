@@ -46,6 +46,7 @@ export const dateTimeValidator = (value, helper) => {
         )
     }
 }
+
 export const GetBikesFilter = Joi.object({
     fromDate: Joi.string()
         .default('2000-01- 00:00:00')
@@ -56,4 +57,10 @@ export const GetBikesFilter = Joi.object({
     model: Joi.string().allow(null),
     location: Joi.string().allow(null),
     page: Joi.number().min(1).allow(null),     
+});
+
+export const ReservationSchema = Joi.object({
+    bikeId: Joi.number().min(1).required(),
+    fromDate: Joi.string().required().custom(dateTimeValidator),
+    toDate: Joi.string().required().custom(dateTimeValidator),
 });
