@@ -16,4 +16,10 @@ export default class GenericService {
                 400,
             )
     }
+
+    async validateBike(bikeId: string | number){
+        const bike = await Bike.findOne(toIntegerOrZero(bikeId));
+        if(bike) return bike;
+        if(!bike) throw new HttpException('Bike not found', 400);
+    }
 }

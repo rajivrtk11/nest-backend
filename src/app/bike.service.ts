@@ -100,4 +100,14 @@ export default class BikeService {
         const bikeIds = reservations.map( (r) => r.bikeId);
         return _.uniq(bikeIds);
     }
+
+    async updateBike(id: string, param: Bike){
+        await this.g.validateBike(id);
+        const bike = await Bike.findOne(id);
+        const { value, error} =  BikeSchema.validate(param);
+        if(error) throw new HttpException(error.message, 400);
+        Object.assign(bike, value);
+        await bike.save();
+        return bike;
+    }
 }
