@@ -67,6 +67,10 @@ export default class UserService{
         const {id} = await this.signup(param);
         const user = await User.findOne(id);
         user.isManager = param.isManager;
+        
+        // console.log('the user is', user);
+        // user.isManager = param.isManager;
+        console.log('the user is', user);
         await user.save();
         return user;
     }
@@ -95,31 +99,29 @@ export default class UserService{
         const {name, email, password, isManager} = value;
         const user = await User.findOne(id);
         if(name) user.name = name;
-        if( email ){
-            if(email){
-                const existingUser = await User.findOne({
-                    where:{
-                        email: email.toLowerCase()
-                    }
-                });
-                if(existingUser && existingUser?.id != Number(id))
-                    throw new HttpException(' Email already exist', 400);
-                else user.email = email;
-             }
-             if(isManager === true || isManager === false){
-                user.isManager = isManager;
-             }
+        if(email){
+            const existingUser = await User.findOne({
+                where:{
+                    email: email.toLowerCase()
+                }
+            });
+            if(existingUser && existingUser?.id != Number(id))
+                throw new HttpException(' Email already exist', 400);
+            else user.email = email;
+        }
+        if(isManager === true || isManager === false){
+            user.isManager = isManager;
+         }
 
-             if(password) user.password = Bcryptjs.hashSync(password, 10);
+        if(password) user.password = Bcryptjs.hashSync(password, 10);
 
-             await user.save();
-             return{
-                id: id,
-                email: user.email,
-                name: user.name,
-                isAdmin: user.isManager,
-             }
-        }    
+        await user.save();
+        return{
+        id: id,
+        email: user.email,
+        name: user.name,
+        isAdmin: user.isManager,
+        }
     }
 
     async deleteUser(id: string){
