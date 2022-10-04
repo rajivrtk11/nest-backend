@@ -3,6 +3,7 @@ import AuthGuard from "src/auth.guard";
 import Bike from "src/entity/bike";
 import Reservation from "src/entity/reservations";
 import User from "src/entity/user";
+import ManagerGuard from "src/manager.guard";
 import BikeService from "./bike.service";
 import { AUser } from "./util";
 
@@ -11,6 +12,7 @@ import { AUser } from "./util";
 export default class BikeController{
     constructor(private readonly bs: BikeService){}
 
+    @UseGuards(ManagerGuard)
     @Post('')
     async addBike(@Body() param: Bike){
         return this.bs.addBike(param)
@@ -38,11 +40,13 @@ export default class BikeController{
        ); 
     }
 
+    @UseGuards(ManagerGuard)
     @Put('/:id')
     async updateBike(@Param('id') id: string, @Body() body: Bike){
         return this.bs.updateBike(id, body);
     }
 
+    @UseGuards(ManagerGuard)
     @Delete('/:id')
     async deleteBike(@Param('id') id: string){
         return this.bs.deleteBike(id);
